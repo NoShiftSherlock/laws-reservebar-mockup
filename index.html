@@ -124,28 +124,7 @@
     color:var(--ink);
     text-decoration:underline;
     text-underline-offset:2px;
-    cursor:pointer;
   }
-  .rb-addr-edit{display:flex;gap:8px;margin-top:8px;}
-  .rb-addr-edit[hidden]{display:none;}
-  .rb-addr-edit input{
-    flex:1;border:1px solid var(--line-strong);border-radius:6px;padding:9px 11px;
-    font:inherit;font-size:14px;color:var(--ink);
-  }
-  .rb-addr-edit input:focus{outline:none;border-color:var(--black);}
-  .rb-addr-edit button{
-    background:var(--black);color:#fff;border:none;border-radius:6px;
-    padding:0 16px;font-size:14px;font-weight:700;cursor:pointer;
-  }
-  .rb-addr-edit button:hover{background:#222;}
-  .rb-addr-msg{font-size:13px;margin-top:6px;}
-  .rb-addr-msg.err{color:#c0392b;}
-  .rb-addr-msg.ok{color:#1e7e34;}
-  .rb-disclaimer{
-    font-size:12px;letter-spacing:.3px;color:var(--muted);
-    display:flex;align-items:center;gap:6px;margin-bottom:18px;
-  }
-  .rb-disclaimer::before{content:"\24D8";font-size:14px;}
   .rb-shipfrom-row{
     display:flex;
     justify-content:space-between;
@@ -187,35 +166,53 @@
     font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.3px;
   }
   .add-cart:hover{background:#222;}
-
-  /* delivery options panel */
-  .rb-options{
-    border:1px solid var(--line-strong);
-    border-radius:10px;
-    overflow:hidden;
-    margin:0 0 22px;
-  }
-  .rb-opt{
-    display:flex;align-items:center;gap:14px;width:100%;
-    text-align:left;background:#fff;border:none;cursor:pointer;
-    padding:14px 18px;border-bottom:1px solid var(--line);
-    font:inherit;color:var(--ink);
-  }
-  .rb-opt:last-child{border-bottom:none;}
-  .rb-opt:hover{background:#f6f6f6;}
-  .rb-opt .radio{
-    width:18px;height:18px;border-radius:50%;border:2px solid var(--line-strong);
-    flex-shrink:0;position:relative;
-  }
-  .rb-opt.selected .radio{border-color:var(--black);}
-  .rb-opt.selected .radio::after{
-    content:"";position:absolute;inset:3px;border-radius:50%;background:var(--black);
-  }
-  .rb-opt .o-text{flex:1;}
-  .rb-opt .o-name{display:block;font-size:15px;font-weight:700;}
-  .rb-opt .o-eta{display:block;font-size:13px;color:var(--muted);margin-top:2px;}
-  .rb-opt .o-fee{font-size:15px;font-weight:700;white-space:nowrap;}
   /* ===== end ReserveBar module ===== */
+
+  /* ===== Delivery options overlay panel (covers price → ATC) ===== */
+  .rb-module{position:relative;}
+  .rb-options{
+    position:absolute;
+    inset:0;
+    background:#fff;
+    z-index:20;
+    display:none;
+    flex-direction:column;
+    overflow:auto;
+    animation:rbslide .18s ease-out;
+  }
+  .rb-options.open{display:flex;}
+  @keyframes rbslide{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  .rb-opt-head{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+  .rb-back{
+    width:38px;height:38px;border:1px solid var(--line-strong);border-radius:8px;
+    background:#fff;cursor:pointer;font-size:22px;line-height:1;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .rb-back:hover{background:#f6f6f6;}
+  .rb-opt-title{font-size:26px;font-weight:800;letter-spacing:-.4px;color:var(--ink);}
+  .rb-tabs{display:flex;gap:30px;border-bottom:1px solid var(--line);margin-bottom:20px;}
+  .rb-tab{
+    background:none;border:none;cursor:pointer;padding:0 0 12px;
+    font-size:15px;font-weight:600;color:var(--muted);position:relative;font-family:inherit;
+  }
+  .rb-tab.active{color:var(--ink);}
+  .rb-tab.active::after{
+    content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--black);
+  }
+  .rb-cards{display:flex;flex-direction:column;gap:14px;}
+  .rb-card{
+    border:1px solid var(--line-strong);border-radius:10px;padding:16px 18px;cursor:pointer;
+    transition:border-color .12s ease;
+  }
+  .rb-card:hover{border-color:#888;}
+  .rb-card.sel{background:var(--black);border-color:var(--black);color:#fff;}
+  .rb-card .crow{display:flex;justify-content:space-between;align-items:baseline;}
+  .rb-card .crow.first{margin-bottom:8px;}
+  .rb-card .m{font-size:16px;font-weight:700;}
+  .rb-card .p{font-size:16px;font-weight:700;}
+  .rb-card .e{font-size:15px;}
+  .rb-card .f{font-size:15px;}
+  /* ===== end delivery options overlay ===== */
 
   .awards{margin-bottom:24px;}
   .awards p{font-size:16px;color:var(--ink);margin-bottom:12px;}
@@ -275,64 +272,30 @@
 
       <!-- ===== ReserveBar commerce module ===== -->
       <div class="rb-module">
-        <div class="rb-price">$51.99</div>
+        <div class="rb-price" id="bigPrice">$51.99</div>
 
         <div class="rb-label">Size</div>
         <div class="rb-size">750 ML</div>
 
         <div class="rb-block">
           <div class="rb-label">Delivers to:</div>
-          <a class="rb-address" id="addrDisplay" href="#">2669 Larimer St, Denver, CO 80205</a>
-          <div class="rb-addr-edit" id="addrEdit" hidden>
-            <input type="text" id="addrInput" value="2669 Larimer St, Denver, CO 80205" placeholder="Street, City, CO ZIP" autocomplete="off">
-            <button id="addrSave" type="button">Save</button>
-          </div>
-          <div class="rb-addr-msg" id="addrMsg" hidden></div>
+          <a class="rb-address" href="#">2669 Larimer St, Denver, CO 80205</a>
         </div>
-
-        <div class="rb-disclaimer">Only delivery available to CO residents.</div>
 
         <div class="rb-shipfrom-row">
           <div class="rb-label" style="margin-bottom:0;">Delivery From:</div>
-          <a class="opt" id="toggleOpts" href="#">See Delivery Options (3)</a>
+          <a class="opt" href="#" id="openOpts">See Delivery Options (3)</a>
         </div>
 
-        <div class="rb-offer" id="selectedOffer">
+        <div class="rb-offer">
           <div class="row first">
-            <span class="merchant" id="selMerchant">Mondo Vino</span>
-            <span class="price-r">$51.99</span>
+            <span class="merchant" id="offMerchant">Pecos Wine &amp; Spirits</span>
+            <span class="price-r" id="offPrice">$51.99</span>
           </div>
           <div class="row">
-            <span class="eta" id="selEta">Arrives in 60 mins</span>
-            <span class="fee" id="selFee">$4.99 Delivery</span>
+            <span class="eta" id="offEta">Arrives in 60 mins</span>
+            <span class="fee" id="offFee">Free Delivery</span>
           </div>
-        </div>
-
-        <div class="rb-options" id="optsPanel" hidden>
-          <button class="rb-opt selected" data-merchant="Mondo Vino" data-eta="Arrives in 60 mins" data-fee="$4.99 Delivery">
-            <span class="radio"></span>
-            <span class="o-text">
-              <span class="o-name">Local Delivery</span>
-              <span class="o-eta">Mondo Vino · within 60 mins</span>
-            </span>
-            <span class="o-fee">$4.99</span>
-          </button>
-          <button class="rb-opt" data-merchant="Ships from Mondo Vino" data-eta="Arrives in 5–7 business days" data-fee="$14.99 Shipping">
-            <span class="radio"></span>
-            <span class="o-text">
-              <span class="o-name">Standard Shipping</span>
-              <span class="o-eta">Ships nationwide · 5–7 business days</span>
-            </span>
-            <span class="o-fee">$14.99</span>
-          </button>
-          <button class="rb-opt" data-merchant="Mondo Vino" data-eta="Ready in 2 hours" data-fee="Free Pickup">
-            <span class="radio"></span>
-            <span class="o-text">
-              <span class="o-name">Store Pickup</span>
-              <span class="o-eta">Mondo Vino · ready in 2 hours</span>
-            </span>
-            <span class="o-fee">Free</span>
-          </button>
         </div>
 
         <div class="rb-cart-row">
@@ -341,7 +304,57 @@
             <div class="val" id="qval">1</div>
             <button id="inc" aria-label="Increase quantity">+</button>
           </div>
-          <button class="add-cart">Add To Cart - $51.99</button>
+          <button class="add-cart" id="addBtn">Add To Cart - $51.99</button>
+        </div>
+
+        <!-- ===== Delivery options overlay (covers price → ATC) ===== -->
+        <div class="rb-options" id="rbOptions">
+        <div class="rb-opt-head">
+          <button class="rb-back" id="closeOpts" aria-label="Back">&lsaquo;</button>
+          <div class="rb-opt-title">Delivery Options</div>
+        </div>
+        <div class="rb-tabs">
+          <button class="rb-tab" data-tab="shipping">Shipping (4)</button>
+          <button class="rb-tab active" data-tab="sameday">Same-Day Delivery (4)</button>
+        </div>
+
+        <div class="rb-cards" id="cardsSameday">
+          <div class="rb-card sel" data-m="Pecos Wine &amp; Spirits" data-p="$51.99" data-e="Arrives in 60 mins" data-f="Free Delivery">
+            <div class="crow first"><span class="m">Pecos Wine &amp; Spirits</span><span class="p">$51.99</span></div>
+            <div class="crow"><span class="e">Arrives in 60 mins</span><span class="f">Free Delivery</span></div>
+          </div>
+          <div class="rb-card" data-m="Vino Mock &amp; Spirits" data-p="$27.50" data-e="Opens at 11:00 AM" data-f="Free Delivery">
+            <div class="crow first"><span class="m">Vino Mock &amp; Spirits</span><span class="p">$27.50</span></div>
+            <div class="crow"><span class="e">Opens at 11:00 AM</span><span class="f">Free Delivery</span></div>
+          </div>
+          <div class="rb-card" data-m="Mock Barrels &amp; Co." data-p="$26.80" data-e="Arrives in 60 mins" data-f="Free Delivery">
+            <div class="crow first"><span class="m">Mock Barrels &amp; Co.</span><span class="p">$26.80</span></div>
+            <div class="crow"><span class="e">Arrives in 60 mins</span><span class="f">Free Delivery</span></div>
+          </div>
+          <div class="rb-card" data-m="The Mock Pour" data-p="$27.99" data-e="Arrives in 90 mins" data-f="Free Delivery">
+            <div class="crow first"><span class="m">The Mock Pour</span><span class="p">$27.99</span></div>
+            <div class="crow"><span class="e">Arrives in 90 mins</span><span class="f">Free Delivery</span></div>
+          </div>
+        </div>
+
+        <div class="rb-cards" id="cardsShipping" style="display:none">
+          <div class="rb-card sel" data-m="W &amp; J Wines &amp; Spirits" data-p="$25.95" data-e="Ships in 2-3 days" data-f="$9.99">
+            <div class="crow first"><span class="m">W &amp; J Wines &amp; Spirits</span><span class="p">$25.95</span></div>
+            <div class="crow"><span class="e">Ships in 2-3 days</span><span class="f">$9.99</span></div>
+          </div>
+          <div class="rb-card" data-m="Vino Mock &amp; Spirits" data-p="$27.50" data-e="Ships in 2-3 days" data-f="$9.99">
+            <div class="crow first"><span class="m">Vino Mock &amp; Spirits</span><span class="p">$27.50</span></div>
+            <div class="crow"><span class="e">Ships in 2-3 days</span><span class="f">$9.99</span></div>
+          </div>
+          <div class="rb-card" data-m="Mock Barrels &amp; Co." data-p="$26.80" data-e="Ships in 2-3 days" data-f="$9.99">
+            <div class="crow first"><span class="m">Mock Barrels &amp; Co.</span><span class="p">$26.80</span></div>
+            <div class="crow"><span class="e">Ships in 2-3 days</span><span class="f">$9.99</span></div>
+          </div>
+          <div class="rb-card" data-m="The Mock Pour" data-p="$27.99" data-e="Ships in 2-3 days" data-f="$9.99">
+            <div class="crow first"><span class="m">The Mock Pour</span><span class="p">$27.99</span></div>
+            <div class="crow"><span class="e">Ships in 2-3 days</span><span class="f">$9.99</span></div>
+          </div>
+        </div>
         </div>
       </div>
       <!-- ===== end ReserveBar module ===== -->
@@ -354,17 +367,6 @@
       <p class="desc">Our Four Grain Bourbon story starts with two Colorado family farms where high quality corn and heirloom varietals of wheat, barley and rye are grown. Those grains find their expression during our labor-intensive cooking technique, bringing each grain's individual character to life, while open-air sour mash adds soulful complexity. After four years in 53-gallon charred oak barrels, influenced by our high-altitude climate, an entirely novel bourbon unfolds.</p>
 
       <div class="aromas">AROMAS:</div>
-      <p class="desc" style="margin:8px 0 22px;">Orange blossoms compliment notes of black tea, honey and dusty pepper.</p>
-
-      <div class="aromas">PALATE:</div>
-      <p class="desc" style="margin:8px 0 22px;">Pekoe tea, orange peel, cinnamon and vanilla custard. Hints of sweet tobacco and spice lead to a rich, dry finish.</p>
-
-      <div class="aromas">THE DETAILS:</div>
-      <p class="desc" style="margin:8px 0 0;">
-        Mash Bill: 60% Colorado corn, 20% heirloom wheat, 10% heirloom rye, 10% heirloom malted barley<br>
-        Aged 4+ years in new 53-gallon charred oak barrels<br>
-        95 Proof · 47.5% ABV
-      </p>
     </div>
 
   </main>
@@ -375,55 +377,37 @@
   document.getElementById('inc').onclick = () => { q++; val.textContent = q; };
   document.getElementById('dec').onclick = () => { if (q > 1) { q--; val.textContent = q; } };
 
-  // delivery options toggle + selection
-  const toggle = document.getElementById('toggleOpts');
-  const panel = document.getElementById('optsPanel');
-  toggle.onclick = (e) => { e.preventDefault(); panel.hidden = !panel.hidden; };
+  const opts = document.getElementById('rbOptions');
+  document.getElementById('openOpts').addEventListener('click', e => {
+    e.preventDefault();
+    opts.classList.add('open');
+  });
+  document.getElementById('closeOpts').addEventListener('click', () => opts.classList.remove('open'));
 
-  document.querySelectorAll('.rb-opt').forEach(opt => {
-    opt.onclick = () => {
-      document.querySelectorAll('.rb-opt').forEach(o => o.classList.remove('selected'));
-      opt.classList.add('selected');
-      document.getElementById('selMerchant').innerHTML = opt.dataset.merchant;
-      document.getElementById('selEta').textContent = opt.dataset.eta;
-      document.getElementById('selFee').innerHTML = opt.dataset.fee;
-      panel.hidden = true;
-    };
+  document.querySelectorAll('.rb-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.rb-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const isShip = tab.dataset.tab === 'shipping';
+      document.getElementById('cardsShipping').style.display = isShip ? 'flex' : 'none';
+      document.getElementById('cardsSameday').style.display = isShip ? 'none' : 'flex';
+    });
   });
 
-  // editable delivery address — Colorado only
-  const addrDisplay = document.getElementById('addrDisplay');
-  const addrEdit = document.getElementById('addrEdit');
-  const addrInput = document.getElementById('addrInput');
-  const addrSave = document.getElementById('addrSave');
-  const addrMsg = document.getElementById('addrMsg');
-
-  function isColorado(addr){
-    const s = addr.trim();
-    if(/\bcolorado\b/i.test(s)) return true;          // "... Colorado ..."
-    if(/,\s*co\b/i.test(s)) return true;              // "..., CO" state abbreviation
-    const zip = s.match(/\b(\d{5})\b/);               // CO ZIPs run 80001–81658
-    if(zip){ const z = +zip[1]; if(z >= 80001 && z <= 81658) return true; }
-    return false;
-  }
-
-  addrDisplay.onclick = (e) => {
-    e.preventDefault();
-    addrEdit.hidden = false;
-    addrMsg.hidden = true;
-    addrInput.focus();
-    addrInput.select();
-  };
-  function saveAddr(){
-    const v = addrInput.value.trim();
-    if(!v){ addrMsg.textContent = 'Please enter a delivery address.'; addrMsg.className = 'rb-addr-msg err'; addrMsg.hidden = false; return; }
-    if(!isColorado(v)){ addrMsg.textContent = 'Sorry — we currently only deliver to Colorado (CO) addresses.'; addrMsg.className = 'rb-addr-msg err'; addrMsg.hidden = false; return; }
-    addrDisplay.textContent = v;
-    addrEdit.hidden = true;
-    addrMsg.textContent = 'Delivery address updated.'; addrMsg.className = 'rb-addr-msg ok'; addrMsg.hidden = false;
-  }
-  addrSave.onclick = saveAddr;
-  addrInput.onkeydown = (e) => { if(e.key === 'Enter'){ e.preventDefault(); saveAddr(); } };
+  document.querySelectorAll('.rb-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.rb-card').forEach(c => c.classList.remove('sel'));
+      card.classList.add('sel');
+      const d = card.dataset;
+      document.getElementById('offMerchant').textContent = d.m;
+      document.getElementById('offPrice').textContent = d.p;
+      document.getElementById('offEta').textContent = d.e;
+      document.getElementById('offFee').textContent = d.f;
+      document.getElementById('bigPrice').textContent = d.p;
+      document.getElementById('addBtn').textContent = 'Add To Cart - ' + d.p;
+      opts.classList.remove('open');
+    });
+  });
 </script>
 </body>
 </html>
